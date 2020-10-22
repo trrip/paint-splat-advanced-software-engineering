@@ -4,8 +4,14 @@
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
+  <script>
+    function moveToNextScreen(event){
+        console.log("moving to next screen");
+    }
+  </script>
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    <button name="button__start" onclick=moveToNextScreen > Click me </button>
   </body>
 </html>
