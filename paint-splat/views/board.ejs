@@ -1,13 +1,31 @@
 <!DOCTYPE html>
+<script src="/socket.io/socket.io.js"></script>
+
 <html>
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
- 
+
+<script>
+
+</script>
+  <script>
+    var socket = io();
+    buttonHandler = (event) =>{
+      socket.emit('gameCom', "some great value");
+      console.log("i clicked this");
+    }
+    socket.on('gameCom', function(msg){
+      console.log(`i geard the new value ${msg}`)
+    });  
+  </script>
+   
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
     <a name="button__start" href="results" > Click me </a>
+    <button onclick="buttonHandler()">some Namme</button>
+
   </body>
 </html>
