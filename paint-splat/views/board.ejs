@@ -2,117 +2,187 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
-  </head>
 
-  <script>
-    var xSteps = null;
-    var ySteps = null;
-    var socket = io.connect();
-    var isGameStarted = false;
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+</head>
 
-    let roomId = "";
-    buttonHandler = (event) => {
-      // socket.to("someUniqueName").emit('gameCom', "some great value");
-      if (roomId === "") {
-        console.log("the room id is not se");
-        isGameStarted = false;
-      } else {
-        // socket.emit("gameCom", {
-        //   roomId: roomId,
-        //   message: {
-        //     xCoordinate: 0,
-        //     yCoordinate: 0,
-        //   },
-        // });
+<script>
+  var xSteps = null;
+  var ySteps = null;
+  var socket = io.connect();
+  var isGameStarted = false;
+
+  let roomId = "";
+  buttonHandler = (event) => {
+    // socket.to("someUniqueName").emit('gameCom', "some great value");
+    if (roomId === "") {
+      // console.log("the room id is not se");
+      isGameStarted = false;
+    } else {
+      // socket.emit("gameCom", {
+      //   roomId: roomId,
+      //   message: {
+      //     xCoordinate: 0,
+      //     yCoordinate: 0,
+      //   },
+      // });
+    }
+    // console.log("i clicked this");
+  };
+  let finalScores = []
+  let splats = [];
+  let xVal = 1;
+  let yVal = 0;
+
+  let x = 50;
+  let y = 50;
+  let score = 0
+  let userId = null
+  let gameEnd = null
+  socket.on("gameCom", function (data) {
+    // xSteps = data.xSteps;
+    // ySteps = data.ySteps;
+    
+    if (data.message.status == 200) {
+      userId = socket.id
+      isGameStarted = true;
+
+      roomId = data.roomId;
+      // console.log("Incoming message:", data);
+      x = data.message.startX;
+      y = data.message.startY;
+      xVal = data.message.initialVelX;
+      yVal = data.message.initialVelY;
+      gameEnd = data.message.gameEnd;
+    } else if (data.message.status == 201) {
+      splats.push({
+        x: data.message.x,
+        y: data.message.y,
+        splatx: data.message.xCoordinate,
+        splaty: data.message.yCoordinate
+      })
+    } else if (data.message.status == 202) {
+      finalScores.push({userId: data.message.userId, score: data.message.score})
+      // splats.push({
+      //   x: data.message.x,
+      //   y: data.message.y,
+      //   splatx: data.message.xCoordinate,
+      //   splaty: data.message.yCoordinate
+      // })
+    } else {
+
+    }
+  });
+
+  function setup() {
+    createCanvas(800, 800);
+  }
+
+  function draw() {
+    if (isGameStarted && Date.now() < gameEnd) {
+      background(255);
+      noFill();
+      strokeWeight(4);
+      stroke(51);
+      fill("rgb(100%,100%,50%)");
+      if (x + xVal > 400 - 10 || x + xVal < 10) {
+        xVal = xVal * -1;
       }
-      console.log("i clicked this");
-    };
 
-    let things = [];
-    let xVal = 1;
-    let yVal = 0;
-
-    let x = 50;
-    let y = 50;
-
-    socket.on("gameCom", function (data) {
-      // xSteps = data.xSteps;
-      // ySteps = data.ySteps;
-      console.log(data);
-      if (data.message.status == 200) {
-        isGameStarted = true;
-
-        roomId = data.roomId;
-        console.log("Incoming message:", data);
-        x = data.message.startX;
-
-        y = data.message.startY;
-        xVal = data.message.initialVelX;
-
-        yVal = data.message.initialVelY;
-      } else {
-        //we draw the the boxes from others .
+      if (y + yVal > 400 - 10 || y + yVal < 10) {
+        yVal = yVal * -1;
       }
-    });
 
-    function setup() {
-      createCanvas(400, 400);
+      x = x + xVal;
+      y = y + yVal;
+
+      square(x, y, 100);
+    for (let i = 0; i < splats.length; i++) {
+      strokeWeight(4);
+      stroke(51);
+      splats[i].splatx += xVal
+      splats[i].splaty += yVal
+      rect(splats[i].splatx, splats[i].splaty, 10, 10);
     }
 
-    function draw() {
-      if (isGameStarted) {
-        background(255);
-        noFill();
-        strokeWeight(4);
-        stroke(51);
-        fill("rgb(100%,100%,50%)");
-        if (x + xVal > 400 - 10 || x + xVal < 10) {
-          xVal = xVal * -1;
+    } else if (gameEnd === null || Date.now() < gameEnd) {
+      text("Waiting room ", 100, 80);
+    } else if (gameEnd === null || Date.now() < gameEnd+2000) {
+      background(255);
+      noFill();
+      strokeWeight(4);
+      stroke(51);
+      fill("rgb(100%,100%,50%)");
+      
+      socket.emit("gameCom", {
+        roomId: roomId,
+        message: {
+          score: score,
+          status: 202,
+          userId: userId
+        },
+      });
+
+    } else {
+      background(255);
+      noFill();
+      strokeWeight(4);
+      stroke(51);
+      fill("rgb(100%,100%,50%)");
+      let winner = null
+      for (let i = 0; i < finalScores.length; i++) {
+        if(winner === null || winner.score < finalScores[i].score ) {
+          winner = {score: finalScores[i].score, userId: finalScores[i].userId}
         }
-
-        if (y + yVal > 400 - 10 || y + yVal < 10) {
-          yVal = yVal * -1;
-        }
-
-        x = x + xVal;
-        y = y + yVal;
-        // x_r = random(-5, 5);
-        // y_r = random(-5, 5);
-        // x = x + x_r;
-        // y = y + y_r;
-
-        square(x, y, 20);
-      } else {
-        text("Waiting room ", 100, 80);
       }
+      text(`The winner is ${winner.userId} who achieved a score of ${winner.score}`, 100, 80);
 
-      // for (i = 0; i < things.length; i++) {
-      //   strokeWeight(4);
-      //   stroke(51);
-      //   things[i].insx += x_r
-      //   things[i].insy += y_r
-      //   rect(things[i].insx, things[i].insy, 10, 10);
-      // }
     }
 
-    function mousePressed(ins) {
-      // things.push({
+    
+  }
+
+  function mousePressed(splat) {
+    if (canvasLimit(x, y, splat.x - 65, splat.y - 65) && eucldist(splat.x - 65, splat.y - 65)) {
+      // network request
+      // splats.push({
       //   x: x,
       //   y: y,
-      //   insx: ins.x,
-      //   insy: ins.y
+      //   splatx: splat.x - 65,
+      //   splaty: splat.y - 65
       // })
-    }
-  </script>
+      socket.emit("gameCom", {
+        roomId: roomId,
+        message: {
+          x: x,
+          y: y,
+          xCoordinate: splat.x - 65,
+          yCoordinate: splat.y - 65,
+          status: 201
+        },
+      });
+      score += 1
 
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-    <a name="button__start" href="results"> Click me </a>
-    <button onclick="buttonHandler()">some Namme</button>
-  </body>
+    }
+  }
+  function eucldist(splatx, splaty) {
+    for (let i = 0; i < splats.length; i++) {
+      if(Math.sqrt(Math.pow(splats[i].splatx - splatx, 2) + Math.pow(splats[i].splaty - splaty, 2)) < 17)  {
+          return false
+      }
+    }
+    return true
+
+  }
+  function canvasLimit(x, y, splatx, splaty) {
+    return splatx + 5 > x && splatx - 95 < x && splaty - 2 > y && splaty - 90 < y
+  }
+</script>
+
+<body>
+</body>
+
 </html>

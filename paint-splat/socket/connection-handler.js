@@ -1,4 +1,4 @@
-GROUP_LENGTH = 3;
+GROUP_LENGTH = 2;
 
 class ConnectionHandler {
   constructor() {
@@ -11,7 +11,7 @@ class ConnectionHandler {
     const io = require("socket.io")(appServer, options);
 
     io.on("connection", (socket) => {
-      console.log("New socket urser is connected");
+      // console.log("New socket urser is connected");
 
       this.queueManager.addMemberToQueue(socket, io);
       // socket.on([...somevar], ...);
@@ -23,6 +23,7 @@ class ConnectionHandler {
 
       socket.on("gameCom", (socketMessage) => {
         let tempChannel = socketMessage.roomId;
+        console.log(1)
         io.sockets.in(tempChannel).emit("gameCom", {
           roomId: tempChannel,
           message: socketMessage.message,
@@ -36,22 +37,6 @@ function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.round(Math.random() * (max - min + 1)) + min;
-}
-
-function createRandomStream() {
-  let xSteps = [];
-  let ySteps = [];
-
-  for (let i = 0; i < 100; i++) {
-    movex = Math.round(getRandomInt(-1, 1));
-    movey = Math.round(getRandomInt(-1, 1));
-    xSteps.push(movex);
-    ySteps.push(movey);
-  }
-  return {
-    xSteps: xSteps,
-    ySteps: ySteps,
-  };
 }
 
 class GameSession {
@@ -69,6 +54,7 @@ class GameSession {
     // list of coordinates that square will follow
     // keep game start message
     // let coordinates = createRandomStream();
+    let gameEnd = Date.now() + 10000
     let startX = getRandomInt(30, 390);
     let startY = getRandomInt(30, 390);
 
@@ -82,14 +68,16 @@ class GameSession {
         startY: startY,
         initialVelX: initialVelocityX,
         initialVelY: initialVelocityY,
+        gameEnd: gameEnd
       },
     });
     io.sockets.in(this.uniqueName).on("gameCom", (socketMessagee) => {
-      console.log("message incoming");
+      // console.log("message incoming");
       io.sockets.in(this.uniqueName).emit("gameCom", {
         roomId: this.uniqueName,
         message: socketMessagee.message,
       });
+
     });
 
     io.sockets.on("disconnect", () => {
@@ -113,12 +101,12 @@ class Queue {
     this.waitingMembersQueue.push(socketMember);
 
     if (this.waitingMembersQueue.length == GROUP_LENGTH) {
-      console.log("we are making a queue " + this.waitingMembersQueue.length);
+      // console.log("we are making a queue " + this.waitingMembersQueue.length);
       this.gameSessions.push(
         new GameSession([...this.waitingMembersQueue], io)
       );
 
-      console.log("starting a new game");
+      // console.log("starting a new game");
 
       this.waitingMembersQueue = [];
       //   console.log("e" + this.waitingMembersQueue);
