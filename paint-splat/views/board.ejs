@@ -4,39 +4,115 @@
 <html>
   <head>
     <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
   </head>
 
-<script>
-
-</script>
   <script>
+    var xSteps = null;
+    var ySteps = null;
     var socket = io.connect();
+    var isGameStarted = false;
+
     let roomId = "";
-    buttonHandler = (event) =>{
+    buttonHandler = (event) => {
       // socket.to("someUniqueName").emit('gameCom', "some great value");
-      if (roomId === ""){
+      if (roomId === "") {
         console.log("the room id is not se");
-      }else{
-        socket.emit('gameCom', {roomId : roomId , message : "some messgae "});
+        isGameStarted = false;
+      } else {
+        // socket.emit("gameCom", {
+        //   roomId: roomId,
+        //   message: {
+        //     xCoordinate: 0,
+        //     yCoordinate: 0,
+        //   },
+        // });
       }
       console.log("i clicked this");
-    }
+    };
 
-    socket.on('gameCom', function(data) {
-      roomId = data.roomId;
-      console.log('Incoming message:', data);
+    let things = [];
+    let xVal = 1;
+    let yVal = 0;
+
+    let x = 50;
+    let y = 50;
+
+    socket.on("gameCom", function (data) {
+      // xSteps = data.xSteps;
+      // ySteps = data.ySteps;
+      console.log(data);
+      if (data.message.status == 200) {
+        isGameStarted = true;
+
+        roomId = data.roomId;
+        console.log("Incoming message:", data);
+        x = data.message.startX;
+
+        y = data.message.startY;
+        xVal = data.message.initialVelX;
+
+        yVal = data.message.initialVelY;
+      } else {
+        //we draw the the boxes from others .
+      }
     });
 
+    function setup() {
+      createCanvas(400, 400);
+    }
 
- 
+    function draw() {
+      if (isGameStarted) {
+        background(255);
+        noFill();
+        strokeWeight(4);
+        stroke(51);
+        fill("rgb(100%,100%,50%)");
+        if (x + xVal > 400 - 10 || x + xVal < 10) {
+          xVal = xVal * -1;
+        }
+
+        if (y + yVal > 400 - 10 || y + yVal < 10) {
+          yVal = yVal * -1;
+        }
+
+        x = x + xVal;
+        y = y + yVal;
+        // x_r = random(-5, 5);
+        // y_r = random(-5, 5);
+        // x = x + x_r;
+        // y = y + y_r;
+
+        square(x, y, 20);
+      } else {
+        text("Waiting room ", 100, 80);
+      }
+
+      // for (i = 0; i < things.length; i++) {
+      //   strokeWeight(4);
+      //   stroke(51);
+      //   things[i].insx += x_r
+      //   things[i].insy += y_r
+      //   rect(things[i].insx, things[i].insy, 10, 10);
+      // }
+    }
+
+    function mousePressed(ins) {
+      // things.push({
+      //   x: x,
+      //   y: y,
+      //   insx: ins.x,
+      //   insy: ins.y
+      // })
+    }
   </script>
-   
+
   <body>
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
-    <a name="button__start" href="results" > Click me </a>
+    <a name="button__start" href="results"> Click me </a>
     <button onclick="buttonHandler()">some Namme</button>
-
   </body>
 </html>
