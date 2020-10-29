@@ -11,14 +11,25 @@
 
 </script>
   <script>
-    var socket = io();
+    var socket = io.connect();
+    let roomId = "";
     buttonHandler = (event) =>{
-      socket.emit('gameCom', "some great value");
+      // socket.to("someUniqueName").emit('gameCom', "some great value");
+      if (roomId === ""){
+        console.log("the room id is not se");
+      }else{
+        socket.emit('gameCom', {roomId : roomId , message : "some messgae "});
+      }
       console.log("i clicked this");
     }
-    socket.on('gameCom', function(msg){
-      console.log(`i geard the new value ${msg}`)
-    });  
+
+    socket.on('gameCom', function(data) {
+      roomId = data.roomId;
+      console.log('Incoming message:', data);
+    });
+
+
+ 
   </script>
    
   <body>
