@@ -23,7 +23,6 @@ class ConnectionHandler {
 
       socket.on("gameCom", (socketMessage) => {
         let tempChannel = socketMessage.roomId;
-        console.log(1)
         io.sockets.in(tempChannel).emit("gameCom", {
           roomId: tempChannel,
           message: socketMessage.message,
@@ -54,7 +53,7 @@ class GameSession {
     // list of coordinates that square will follow
     // keep game start message
     // let coordinates = createRandomStream();
-    let gameEnd = Date.now() + 10000
+    let gameEnd = Date.now() + 10000;
     let startX = getRandomInt(30, 390);
     let startY = getRandomInt(30, 390);
 
@@ -68,7 +67,7 @@ class GameSession {
         startY: startY,
         initialVelX: initialVelocityX,
         initialVelY: initialVelocityY,
-        gameEnd: gameEnd
+        gameEnd: gameEnd,
       },
     });
     io.sockets.in(this.uniqueName).on("gameCom", (socketMessagee) => {
@@ -77,7 +76,6 @@ class GameSession {
         roomId: this.uniqueName,
         message: socketMessagee.message,
       });
-
     });
 
     io.sockets.on("disconnect", () => {
