@@ -53,7 +53,7 @@ class GameSession {
     // list of coordinates that square will follow
     // keep game start message
     // let coordinates = createRandomStream();
-    let gameEnd = Date.now() + 10000;
+    let gameEnd = Date.now() + 60000;
     let startX = getRandomInt(30, 390);
     let startY = getRandomInt(30, 390);
 

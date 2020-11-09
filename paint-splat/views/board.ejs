@@ -7,16 +7,24 @@
     <link rel="stylesheet" href="/stylesheets/style.css" />
     <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
   </head>
-
   <script>
+    let GAMETIME = 60000;
     let AllUsers = [];
-    let userColorMap = ["#ffff00", "#021ff0", "#55ff00", "#ddff00"];
+    let userColorMap = [
+      "#000",
+      "#fff",
+      "#ff0000",
+      "#0000ff",
+      // "#000",
+      // "#ff003f",
+    ];
 
     class Splat {
       constructor(color, x, y) {
         this.color = color;
         this.x = x;
         this.y = y;
+        console.log(this.color);
       }
       getColor() {
         console.log(this.color);
@@ -25,7 +33,7 @@
     }
     var xSteps = null;
     var ySteps = null;
-    var socket = io.connect();
+    var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
     AllUsers.push(socket.id);
     var isGameStarted = false;
 
@@ -46,11 +54,20 @@
       }
       // console.log("i clicked this");
     };
+
+    let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
+
+    let SPEED = 4;
+
     let finalScores = [];
     let splats = [];
     let xVal = 1;
     let yVal = 0;
-
+    let t = 0;
+    let frame = 0;
+    let boardWidth = 300;
+    let boardHeight = 300;
+    let canvasSize = 600;
     let x = 50;
     let y = 50;
     let score = 0;
@@ -66,8 +83,8 @@
 
         roomId = data.roomId;
         // console.log("Incoming message:", data);
-        x = data.message.startX;
-        y = data.message.startY;
+        x = data.message.startX % boardWidth;
+        y = data.message.startY % boardHeight;
         xVal = data.message.initialVelX;
         yVal = data.message.initialVelY;
         gameEnd = data.message.gameEnd;
@@ -81,7 +98,7 @@
         console.log(AllUsers.indexOf(data.message.user));
         console.log(userColorMap[AllUsers.indexOf(data.message.user)]);
         let newSpat = new Splat(
-          userColorMap[AllUsers.indexOf(data.message.user)],
+          userColorMap[AllUsers.indexOf(data.message.user) - 1],
           data.message.xCoordinate,
           data.message.yCoordinate
         );
@@ -108,42 +125,94 @@
     });
 
     function setup() {
-      createCanvas(800, 800);
+      createCanvas(canvasSize, canvasSize);
     }
 
+    function getRandomPathSelector() {
+      return Math.floor(Math.random() * 9 + 1);
+    }
     function draw() {
-      let boardWidth = 200;
       if (isGameStarted && Date.now() < gameEnd) {
         background(155);
+        // console.log(gameEnd % 60);
         noFill();
-        strokeWeight(4);
+        strokeWeight(1);
         stroke(51);
         fill("rgb(100%,100%,50%)");
-        if (x + xVal > 800 - boardWidth || x + xVal < 0) {
+        if (x + xVal > canvasSize - boardWidth || x + xVal < 0) {
+          if (x > 5 && x < canvasSize) {
+            yVal = yVal * theCombination[getRandomPathSelector() - 1];
+          }
           xVal = xVal * -1;
         }
 
-        if (y + yVal > 800 - boardWidth || y + yVal < 0) {
+        if (y + yVal > canvasSize - boardHeight || y + yVal < 0) {
+          if (y > 5 && y < canvasSize) {
+            xVal = xVal * theCombination[getRandomPathSelector() - 1];
+          }
+
           yVal = yVal * -1;
         }
 
-        square(x, y, 400);
+        if (
+          !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
+          !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+          frame % 10 == 0 &&
+          Math.random() > 0.5 &&
+          y > 5 &&
+          y < canvasSize
+        ) {
+          yVal = yVal * theCombination[getRandomPathSelector() - 1];
+        }
+        console.log(xVal);
+        if (
+          !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
+          !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+          frame % 10 == 0 &&
+          Math.random() > 0.5 &&
+          x > 5 &&
+          x < canvasSize
+        ) {
+          xVal = xVal * theCombination[getRandomPathSelector() - 1];
+        }
+
+        frame += 1;
+
+        square(x, y, boardWidth);
         for (let i = 0; i < splats.length; i++) {
-          strokeWeight(4);
+          strokeWeight(1);
           stroke(51);
           // splats[i].x += xVal;
           // splats[i].y += yVal;
-          fill(color(splats[i].color));
+          let finalColor = color(splats[i].color);
+          if (finalColor == null) {
+            finalColor = "#FF00FF";
+          }
+          fill(finalColor);
           // fill(255);
           //we draw the box
           rect(x + splats[i].x - 65, y + splats[i].y - 65, 10, 10);
         }
         //Trying to move the board always at the end.
-        x = x + xVal;
-        y = y + yVal;
+        // if (
+        //   Math.random() >= 0.5 &&
+        //   !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+        //   !(y + yVal > canvasSize - boardHeight || y + yVal < 0)
+        // ) {
+        //   x = x + xVal * SPEED * theCombination[getRandomPathSelector() - 1];
+        //   y = y + yVal * SPEED * theCombination[getRandomPathSelector() - 1];
+        // } else {
+        //   x = x + xVal * SPEED;
+        //   y = y + yVal * SPEED;
+        // }
+        let increaseSpeed =
+          ((parseInt((Date.now() / gameEnd + "")[9]) / 6) % 1) * 6 + 1;
+        console.log(increaseSpeed);
+        x = x + xVal * (SPEED * increaseSpeed);
+        y = y + yVal * (SPEED * increaseSpeed);
       } else if (gameEnd === null || Date.now() < gameEnd) {
         text("Waiting room ", 100, 80);
-      } else if (gameEnd === null || Date.now() < gameEnd + 500000) {
+      } else if (gameEnd === null || Date.now() < gameEnd + 200) {
         background(255);
         noFill();
         strokeWeight(4);
@@ -173,11 +242,15 @@
             };
           }
         }
+        // text(`The winner is  who achieved a score of user.`, 100, 80);
         text(
           `The winner is ${winner.userId} who achieved a score of ${winner.score}`,
           100,
           80
         );
+        setTimeout(() => {
+          window.location.replace("/");
+        }, 5000);
       }
     }
 
@@ -187,9 +260,9 @@
         `the clicked positions are ${splat.x} : ${splat.y} ${x}  ${y}`
       );
       if (
-        true
-        // canvasLimit(x, y, splat.x - 65, splat.y - 65) &&
-        // eucldist(splat.x - 65, splat.y - 65)
+        // true
+        canvasLimit(x, y, splat.x, splat.y) &&
+        eucldist(splat.x - 65, splat.y - 65)
       ) {
         // network request
         // splats.push({
@@ -213,11 +286,21 @@
       }
     }
     function eucldist(splatx, splaty) {
+      console.log(`x: ${x} y ${y} and ${splatx} and splat ${splaty}`);
+
+      console.log(splats);
+
       for (let i = 0; i < splats.length; i++) {
+        // console.log(
+        //   Math.sqrt(
+        //     Math.pow(splats[i].x - splatx, 2) +
+        //       Math.pow(splats[i].y - splaty, 2)
+        //   )
+        // );
         if (
           Math.sqrt(
-            Math.pow(splats[i].splatx - splatx, 2) +
-              Math.pow(splats[i].splaty - splaty, 2)
+            Math.pow(splats[i].x - splatx, 2) +
+              Math.pow(splats[i].y - splaty, 2)
           ) < 17
         ) {
           return false;
@@ -226,8 +309,13 @@
       return true;
     }
     function canvasLimit(x, y, splatx, splaty) {
+      splatx -= 65;
+      splaty -= 65;
       return (
-        splatx + 5 > x && splatx - 95 < x && splaty - 2 > y && splaty - 90 < y
+        splatx + 5 > x &&
+        splatx - boardWidth < x &&
+        splaty - 5 > y &&
+        splaty - boardHeight < y
       );
     }
   </script>
