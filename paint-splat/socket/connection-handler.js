@@ -40,22 +40,17 @@ function getRandomInt(min, max) {
 
 class GameSession {
   constructor(members, io) {
-    // this.sessionId = "";
-    // this.player = [];
     this.uniqueName = members[0].id;
 
     for (let i of members) {
-      //create a unique name here --
       i.join(this.uniqueName);
     }
     let randomVel = [1, -1];
 
-    // list of coordinates that square will follow
-    // keep game start message
-    // let coordinates = createRandomStream();
-    let gameEnd = Date.now() + 60000;
+    let gameEnd = Date.now() + 10000;
     let startX = getRandomInt(30, 390);
     let startY = getRandomInt(30, 390);
+    let speed = getRandomInt(2, 4);
 
     let initialVelocityX = Math.random() < 0.5 ? -1 : 1;
     let initialVelocityY = Math.random() < 0.5 ? -1 : 1;
@@ -68,10 +63,10 @@ class GameSession {
         initialVelX: initialVelocityX,
         initialVelY: initialVelocityY,
         gameEnd: gameEnd,
+        speed: speed
       },
     });
     io.sockets.in(this.uniqueName).on("gameCom", (socketMessagee) => {
-      // console.log("message incoming");
       io.sockets.in(this.uniqueName).emit("gameCom", {
         roomId: this.uniqueName,
         message: socketMessagee.message,
@@ -85,7 +80,6 @@ class GameSession {
 }
 
 class Queue {
-  // socketId = 0
   constructor() {
     this.waitingMembersQueue = []; //members that are waiting in the queue. //waiting room
     this.gameSessions = [];
@@ -94,20 +88,14 @@ class Queue {
   removeMemberFromQueue = () => {};
 
   addMemberToQueue = (socketMember, io) => {
-    // we can generate the unique session is and make a game session out of it
-
     this.waitingMembersQueue.push(socketMember);
 
     if (this.waitingMembersQueue.length == GROUP_LENGTH) {
-      // console.log("we are making a queue " + this.waitingMembersQueue.length);
       this.gameSessions.push(
         new GameSession([...this.waitingMembersQueue], io)
       );
 
-      // console.log("starting a new game");
-
       this.waitingMembersQueue = [];
-      //   console.log("e" + this.waitingMembersQueue);
     }
   };
 }

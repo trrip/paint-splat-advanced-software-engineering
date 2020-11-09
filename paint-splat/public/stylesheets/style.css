@@ -1,8 +1,21 @@
+html {
+  background-image: url("/resources/cool-background.png");
+  background-size: cover;
+
+
+}
+
 body {
   padding: 50px;
+  color: #e2e2e2;
+  /* background-color: #cccccc; */
+
+
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #00B7FF;
 }
+
+

@@ -2,323 +2,364 @@
 <script src="/socket.io/socket.io.js"></script>
 
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel="stylesheet" href="/stylesheets/style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
-  </head>
-  <script>
-    let GAMETIME = 60000;
-    let AllUsers = [];
-    let userColorMap = [
-      "#000",
-      "#fff",
-      "#ff0000",
-      "#0000ff",
-      // "#000",
-      // "#ff003f",
-    ];
 
-    class Splat {
-      constructor(color, x, y) {
-        this.color = color;
-        this.x = x;
-        this.y = y;
-        console.log(this.color);
-      }
-      getColor() {
-        console.log(this.color);
-        return this.color;
-      }
+<head>
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+            
+</head>
+
+<div class="section no-pad-bot" id="before-game">
+  <div class="container">
+    <div class="row center">
+      <div class="col s12 m8 offset-m2">
+        <h4 class="light">Waiting for players to join... </h4>
+  
+      <div class="row center">
+        <img src="/resources/loading.gif"></div>
+    </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+
+<!-- <div class="section no-pad-bot" id="loading-winners">
+  <div class="container">
+    <div class="row center">
+      <div class="col s12 m8 offset-m2">
+        <h4 class="light">Loading winners </h4>
+  
+      <div class="row center">
+        <img src="/resources/loading.gif"></div>
+    </div>
+    </div>
+  </div>
+  </div>
+</div> -->
+
+<div class="section no-pad-bot" id="after-game">
+  <div class="container">
+    <div class="row center">
+      <div class="col s12 m8 offset-m2">
+        <h4 class="light" id = "game-results"></h4>
+        <div class="row center">
+          <a href="/" id="download-button" class="btn-large waves-effect waves-light indigo darken-4">Continue</a>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  </div>
+</div>
+
+
+<script>
+  document.getElementById("after-game").style.display = "none";
+  let GAMETIME = 60000;
+  let AllUsers = [];
+  let userColorMap = [
+    "#00FF00",
+    "#ffa500 ",
+    "#3792cb",
+    "#800000",
+  ];
+  let playerColourNames = [
+    "Green",
+    "Orange",
+    "Blue",
+    "Red"
+  ]
+  let playerIndex = 0;
+
+  class Splat {
+    constructor(color, x, y) {
+      this.color = color;
+      this.x = x;
+      this.y = y;
     }
-    var xSteps = null;
-    var ySteps = null;
-    var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
-    AllUsers.push(socket.id);
-    var isGameStarted = false;
+    getColor() {
+      return this.color;
+    }
+  }
+  var xSteps = null;
+  var ySteps = null;
+  var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
+  AllUsers.push(socket.id);
+  var isGameStarted = false;
 
-    let roomId = "";
-    buttonHandler = (event) => {
-      // socket.to("someUniqueName").emit('gameCom', "some great value");
-      if (roomId === "") {
-        // console.log("the room id is not se");
-        isGameStarted = false;
+  let roomId = "";
+  buttonHandler = (event) => {
+    if (roomId === "") {
+      isGameStarted = false;
+    } else {
+    }
+  };
+
+  let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
+
+  let SPEED = 4;
+
+  let finalScores = [];
+  let splats = [];
+  let xVal = 1;
+  let yVal = 0;
+  let t = 0;
+  let frame = 0;
+  let boardWidth = 300;
+  let boardHeight = 300;
+  let canvasSize = 600;
+  let x = 50;
+  let y = 50;
+  let score = 0;
+  let userId = null;
+  let gameEnd = null;
+  let showMessage = false;
+  let messageTimer = 0;
+  let messageX = 0;
+  let messageY = 0;
+  let message = "";
+  let canThrow = true;
+  socket.on("gameCom", function (data) {
+    if (data.message.status == 200) {
+      userId = socket.id;
+      isGameStarted = true;
+
+      roomId = data.roomId;
+      x = data.message.startX % boardWidth;
+      y = data.message.startY % boardHeight;
+      xVal = data.message.initialVelX;
+      yVal = data.message.initialVelY;
+      gameEnd = data.message.gameEnd;
+      SPEED = data.message.speed;
+    } else if (data.message.status == 201) {
+      if (AllUsers.indexOf(data.message.user) >= 0) {
       } else {
-        // socket.emit("gameCom", {
-        //   roomId: roomId,
-        //   message: {
-        //     xCoordinate: 0,
-        //     yCoordinate: 0,
-        //   },
-        // });
+        AllUsers.push(data.message.user);
       }
-      // console.log("i clicked this");
-    };
-
-    let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
-
-    let SPEED = 4;
-
-    let finalScores = [];
-    let splats = [];
-    let xVal = 1;
-    let yVal = 0;
-    let t = 0;
-    let frame = 0;
-    let boardWidth = 300;
-    let boardHeight = 300;
-    let canvasSize = 600;
-    let x = 50;
-    let y = 50;
-    let score = 0;
-    let userId = null;
-    let gameEnd = null;
-    socket.on("gameCom", function (data) {
-      // xSteps = data.xSteps;
-      // ySteps = data.ySteps;
-
-      if (data.message.status == 200) {
-        userId = socket.id;
-        isGameStarted = true;
-
-        roomId = data.roomId;
-        // console.log("Incoming message:", data);
-        x = data.message.startX % boardWidth;
-        y = data.message.startY % boardHeight;
-        xVal = data.message.initialVelX;
-        yVal = data.message.initialVelY;
-        gameEnd = data.message.gameEnd;
-      } else if (data.message.status == 201) {
-        // we have to edit some code here.
-
-        if (AllUsers.indexOf(data.message.user) >= 0) {
-        } else {
-          AllUsers.push(data.message.user);
-        }
-        console.log(AllUsers.indexOf(data.message.user));
-        console.log(userColorMap[AllUsers.indexOf(data.message.user)]);
-        let newSpat = new Splat(
-          userColorMap[AllUsers.indexOf(data.message.user) - 1],
-          data.message.xCoordinate,
-          data.message.yCoordinate
-        );
-        // splats.push({
-        //   x: data.message.x,
-        //   y: data.message.y,
-        //   splatx: data.message.xCoordinate,
-        //   splaty: data.message.yCoordinate,
-        // });
-        splats.push(newSpat);
-      } else if (data.message.status == 202) {
-        finalScores.push({
-          userId: data.message.userId,
-          score: data.message.score,
-        });
-        // splats.push({
-        //   x: data.message.x,
-        //   y: data.message.y,
-        //   splatx: data.message.xCoordinate,
-        //   splaty: data.message.yCoordinate
-        // })
-      } else {
-      }
-    });
-
-    function setup() {
-      createCanvas(canvasSize, canvasSize);
+      let newSpat = new Splat(
+        userColorMap[AllUsers.indexOf(data.message.user) - 1],
+        data.message.xCoordinate,
+        data.message.yCoordinate
+      );
+      playerIndex = AllUsers.indexOf(data.message.user) - 1
+      splats.push(newSpat);
+    } else if (data.message.status == 202) {
+      finalScores.push({
+        userId: data.message.userId,
+        score: data.message.score,
+        userColour:  data.message.userColour
+      });
+    } else {
     }
+  });
 
-    function getRandomPathSelector() {
-      return Math.floor(Math.random() * 9 + 1);
-    }
-    function draw() {
-      if (isGameStarted && Date.now() < gameEnd) {
-        background(155);
-        // console.log(gameEnd % 60);
-        noFill();
-        strokeWeight(1);
-        stroke(51);
-        fill("rgb(100%,100%,50%)");
-        if (x + xVal > canvasSize - boardWidth || x + xVal < 0) {
-          if (x > 5 && x < canvasSize) {
-            yVal = yVal * theCombination[getRandomPathSelector() - 1];
-          }
-          xVal = xVal * -1;
-        }
+  function setup() {
+    createCanvas(canvasSize, canvasSize);
+  }
 
-        if (y + yVal > canvasSize - boardHeight || y + yVal < 0) {
-          if (y > 5 && y < canvasSize) {
-            xVal = xVal * theCombination[getRandomPathSelector() - 1];
-          }
-
-          yVal = yVal * -1;
-        }
-
-        if (
-          !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
-          !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
-          frame % 10 == 0 &&
-          Math.random() > 0.5 &&
-          y > 5 &&
-          y < canvasSize
-        ) {
+  function getRandomPathSelector() {
+    return Math.floor(Math.random() * 9 + 1);
+  }
+  function draw() {
+    if (isGameStarted && Date.now() < gameEnd) {
+      document.getElementById("before-game").style.display = "none";
+      clear()
+      background(155);
+      noFill();
+      strokeWeight(1);
+      stroke(51);
+      fill("rgb(100%,100%,50%)");
+      
+      if (x + xVal > canvasSize - boardWidth || x + xVal < 0) {
+        if (x > 5 && x < canvasSize) {
           yVal = yVal * theCombination[getRandomPathSelector() - 1];
         }
-        console.log(xVal);
-        if (
-          !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
-          !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
-          frame % 10 == 0 &&
-          Math.random() > 0.5 &&
-          x > 5 &&
-          x < canvasSize
-        ) {
+        xVal = xVal * -1;
+      }
+
+      if (y + yVal > canvasSize - boardHeight || y + yVal < 0) {
+        if (y > 5 && y < canvasSize) {
           xVal = xVal * theCombination[getRandomPathSelector() - 1];
         }
 
-        frame += 1;
+        yVal = yVal * -1;
+      }
 
-        square(x, y, boardWidth);
-        for (let i = 0; i < splats.length; i++) {
-          strokeWeight(1);
-          stroke(51);
-          // splats[i].x += xVal;
-          // splats[i].y += yVal;
-          let finalColor = color(splats[i].color);
-          if (finalColor == null) {
-            finalColor = "#FF00FF";
-          }
-          fill(finalColor);
-          // fill(255);
-          //we draw the box
-          rect(x + splats[i].x - 65, y + splats[i].y - 65, 10, 10);
-        }
-        //Trying to move the board always at the end.
-        // if (
-        //   Math.random() >= 0.5 &&
-        //   !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
-        //   !(y + yVal > canvasSize - boardHeight || y + yVal < 0)
-        // ) {
-        //   x = x + xVal * SPEED * theCombination[getRandomPathSelector() - 1];
-        //   y = y + yVal * SPEED * theCombination[getRandomPathSelector() - 1];
-        // } else {
-        //   x = x + xVal * SPEED;
-        //   y = y + yVal * SPEED;
-        // }
-        let increaseSpeed =
-          ((parseInt((Date.now() / gameEnd + "")[9]) / 6) % 1) * 6 + 1;
-        console.log(increaseSpeed);
-        x = x + xVal * (SPEED * increaseSpeed);
-        y = y + yVal * (SPEED * increaseSpeed);
-      } else if (gameEnd === null || Date.now() < gameEnd) {
-        text("Waiting room ", 100, 80);
-      } else if (gameEnd === null || Date.now() < gameEnd + 200) {
-        background(255);
-        noFill();
-        strokeWeight(4);
+      if (
+        !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
+        !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+        frame % 10 == 0 &&
+        Math.random() > 0.5 &&
+        y > 5 &&
+        y < canvasSize
+      ) {
+        yVal = yVal * theCombination[getRandomPathSelector() - 1];
+      }
+      if (
+        !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
+        !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+        frame % 10 == 0 &&
+        Math.random() > 0.5 &&
+        x > 5 &&
+        x < canvasSize
+      ) {
+        xVal = xVal * theCombination[getRandomPathSelector() - 1];
+      }
+
+      frame += 1;
+
+      square(x, y, boardWidth);
+      for (let i = 0; i < splats.length; i++) {
+        strokeWeight(1);
         stroke(51);
-        fill("rgb(100%,100%,50%)");
+        let finalColor = color(splats[i].color);
+        if (finalColor == null) {
+          finalColor = "#FF00FF";
+        }
+        fill(finalColor);
+        circle(x + splats[i].x - 65, y + splats[i].y - 65, 10);
+      }
+      
+      let increaseSpeed = 
+        ((parseInt((Date.now() / gameEnd + "")[9]) / 6) % 1) * 6 + 1;
+      x = x + xVal * (SPEED * increaseSpeed);
+      y = y + yVal * (SPEED * increaseSpeed);
 
+      if (messageTimer > 0) {
+        strokeWeight(messageTimer / 30);
+        fill(messageTimer, messageTimer, messageTimer, 100)
+        text(message, messageX - 70, messageY - 75)
+        messageTimer--;
+        canThrow = false;
+      } else {
+        canThrow = true;
+      }
+
+    } else if (gameEnd === null || Date.now() < gameEnd) {
+      // text("Waiting room ", 100, 80);
+
+    
+
+    } else if (gameEnd === null || Date.now() < gameEnd + 1400) {
+      // 
+      background(255);
+      noFill();
+      strokeWeight(4);
+      stroke(51);
+      fill("rgb(100%,100%,50%)");
+      if(score > 0 && splats.length > 0 ) {
         socket.emit("gameCom", {
           roomId: roomId,
           message: {
             score: score,
             status: 202,
-            userId: userId,
+            userId: userId, 
+            userColour: playerColourNames[playerIndex]
+
           },
         });
-      } else {
-        background(255);
-        noFill();
-        strokeWeight(4);
-        stroke(51);
-        fill("rgb(100%,100%,50%)");
-        let winner = null;
-        for (let i = 0; i < finalScores.length; i++) {
-          if (winner === null || winner.score < finalScores[i].score) {
-            winner = {
-              score: finalScores[i].score,
-              userId: finalScores[i].userId,
-            };
-          }
-        }
-        // text(`The winner is  who achieved a score of user.`, 100, 80);
-        text(
-          `The winner is ${winner.userId} who achieved a score of ${winner.score}`,
-          100,
-          80
-        );
-        setTimeout(() => {
-          window.location.replace("/");
-        }, 5000);
-      }
-    }
+     } else {
 
-    function mousePressed(splat) {
-      // splat is the point containing x and y where rthe user clicked.
-      console.log(
-        `the clicked positions are ${splat.x} : ${splat.y} ${x}  ${y}`
-      );
+     }
+    } else {
+      clear()
+      let isDraw = false;
+      if(finalScores.length == 0) {
+        document.getElementById("after-game").style.display = "block";
+        document.getElementById("game-results").innerText = `The match was a draw!`;
+      } else {
+        let winner = null;
+      for (let i = 0; i < finalScores.length; i++) {
+        if (winner === null || winner.score < finalScores[i].score) {
+          winner = {
+            score: finalScores[i].score,
+            userId: finalScores[i].userId,
+            userColour: finalScores[i].userColour,
+          };
+        } else if (winner.score === finalScores[i].score && finalScores[i].userColour !== winner.userColour) {
+          isDraw = true
+        }
+      }
+      if(isDraw) {
+        document.getElementById("after-game").style.display = "block";
+        document.getElementById("game-results").innerText = `The match was a draw!`;
+
+      } else {
+        document.getElementById("after-game").style.display = "block";
+        document.getElementById("game-results").innerText = `The winner is ${winner.userColour} who achieved a score of ${winner.score}`;
+      }
+      
+      }
+
+      
+      setTimeout(() => {
+        window.location.replace("/");
+      }, 5000);
+    }
+  }
+
+  function mousePressed(splat) {
+    if (canThrow) {
+      messageTimer = 50;
+      messageX = splat.x;
+      messageY = splat.y;
+
+      
       if (
-        // true
         canvasLimit(x, y, splat.x, splat.y) &&
-        eucldist(splat.x - 65, splat.y - 65)
+        eucldist(splat.x - x + 5, splat.y - y + 5)
       ) {
-        // network request
-        // splats.push({
-        //   x: x,
-        //   y: y,
-        //   splatx: splat.x - 65,
-        //   splaty: splat.y - 65
-        // })
+        message = "hit"
         socket.emit("gameCom", {
           roomId: roomId,
           message: {
             x: x,
             y: y,
-            xCoordinate: splat.x - x,
-            yCoordinate: splat.y - y,
+            xCoordinate: splat.x - x + 5,
+            yCoordinate: splat.y - y + 5,
             user: socket.id,
             status: 201,
           },
         });
         score += 1;
+      } else {
+        message = "miss"
+
       }
     }
-    function eucldist(splatx, splaty) {
-      console.log(`x: ${x} y ${y} and ${splatx} and splat ${splaty}`);
+  }
+  function eucldist(splatx, splaty) {
 
-      console.log(splats);
-
-      for (let i = 0; i < splats.length; i++) {
-        // console.log(
-        //   Math.sqrt(
-        //     Math.pow(splats[i].x - splatx, 2) +
-        //       Math.pow(splats[i].y - splaty, 2)
-        //   )
-        // );
-        if (
-          Math.sqrt(
-            Math.pow(splats[i].x - splatx, 2) +
-              Math.pow(splats[i].y - splaty, 2)
-          ) < 17
-        ) {
-          return false;
-        }
+    for (let i = 0; i < splats.length; i++) {
+      if (
+        Math.sqrt(
+          Math.pow(
+            splats[i].x - splatx, 2
+          ) + Math.pow(splats[i].y - splaty, 2)) < 11) {
+        return false
       }
-      return true;
     }
-    function canvasLimit(x, y, splatx, splaty) {
-      splatx -= 65;
-      splaty -= 65;
-      return (
-        splatx + 5 > x &&
-        splatx - boardWidth < x &&
-        splaty - 5 > y &&
-        splaty - boardHeight < y
-      );
-    }
-  </script>
+    return true
+  }
 
-  <body></body>
+
+  function canvasLimit(x, y, splatx, splaty) {
+    splatx -= 60;
+    splaty -= 60;
+    return (
+      splatx + 5 > x + 7 &&
+      splatx - boardWidth < x &&
+      splaty - 5 > y &&
+      splaty - boardHeight < y
+    );
+  }
+</script>
+
+<body></body>
+
 </html>
