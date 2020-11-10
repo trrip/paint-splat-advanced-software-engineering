@@ -7,12 +7,13 @@
   <title><%= title %></title>
   <link rel="stylesheet" href="/stylesheets/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
-  <link rel="stylesheet" href="/stylesheets/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet1" href="./stylesheets/style.css" />
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
             
 </head>
-
+<body scroll="no" style="overflow: hidden">
 <div class="section no-pad-bot" id="before-game">
   <div class="container">
     <div class="row center">
@@ -102,7 +103,7 @@
 
   let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
 
-  let SPEED = 4;
+  let SPEED = 2;
 
   let finalScores = [];
   let splats = [];
@@ -112,7 +113,8 @@
   let frame = 0;
   let boardWidth = 300;
   let boardHeight = 300;
-  let canvasSize = 600;
+  var canvasHeight ;//= windowHeight - 80;
+  var canvasWidth ;
   let x = 50;
   let y = 50;
   let score = 0;
@@ -159,7 +161,17 @@
   });
 
   function setup() {
-    createCanvas(canvasSize, canvasSize);
+    var canvasSize = windowHeight - 80;
+   canvasHeight = windowHeight - 80;
+   canvasWidth = windowWidth - 80;
+    createCanvas(canvasWidth - 80, canvasHeight - 80);
+  }
+
+  function windowResized() {
+  resizeCanvas(windowWidth -80, windowHeight-80);
+  canvasHeight = windowWidth - 80;
+  canvasHeight = windowHeight - 80;
+  
   }
 
   function getRandomPathSelector() {
@@ -175,15 +187,15 @@
       stroke(51);
       fill("rgb(100%,100%,50%)");
       
-      if (x + xVal > canvasSize - boardWidth || x + xVal < 0) {
-        if (x > 5 && x < canvasSize) {
+      if (x + xVal > canvasWidth - boardWidth || x + xVal < 0) {
+        if (x > 5 && x < canvasWidth) {
           yVal = yVal * theCombination[getRandomPathSelector() - 1];
         }
         xVal = xVal * -1;
       }
 
-      if (y + yVal > canvasSize - boardHeight || y + yVal < 0) {
-        if (y > 5 && y < canvasSize) {
+      if (y + yVal > canvasHeight - boardHeight || y + yVal < 0) {
+        if (y > 5 && y < canvasHeight) {
           xVal = xVal * theCombination[getRandomPathSelector() - 1];
         }
 
@@ -191,22 +203,22 @@
       }
 
       if (
-        !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
-        !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+        !(y + yVal > canvasHeight - boardHeight || y + yVal < 0) &&
+        !(x + xVal > canvasWidth - boardWidth || x + xVal < 0) &&
         frame % 10 == 0 &&
         Math.random() > 0.5 &&
         y > 5 &&
-        y < canvasSize
+        y < canvasHeight
       ) {
         yVal = yVal * theCombination[getRandomPathSelector() - 1];
       }
       if (
-        !(y + yVal > canvasSize - boardHeight || y + yVal < 0) &&
-        !(x + xVal > canvasSize - boardWidth || x + xVal < 0) &&
+        !(y + yVal > canvasHeight - boardHeight || y + yVal < 0) &&
+        !(x + xVal > canvasWidth - boardWidth || x + xVal < 0) &&
         frame % 10 == 0 &&
         Math.random() > 0.5 &&
         x > 5 &&
-        x < canvasSize
+        x < canvasWidth
       ) {
         xVal = xVal * theCombination[getRandomPathSelector() - 1];
       }
@@ -360,6 +372,6 @@
   }
 </script>
 
-<body></body>
+</body>
 
 </html>
