@@ -4,7 +4,7 @@ class ConnectionHandler {
   constructor() {
     this.queueManager = new Queue();
   }
-  listen = (appServer) => {
+  listen = function (appServer) {
     const options = {
       /* ... */
     };
@@ -63,7 +63,7 @@ class GameSession {
         initialVelX: initialVelocityX,
         initialVelY: initialVelocityY,
         gameEnd: gameEnd,
-        speed: speed
+        speed: speed,
       },
     });
     io.sockets.in(this.uniqueName).on("gameCom", (socketMessagee) => {
