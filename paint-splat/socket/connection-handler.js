@@ -4,7 +4,7 @@ class ConnectionHandler {
   constructor() {
     this.queueManager = new Queue();
   }
-  listen = function (appServer) {
+  listen(appServer) {
     const options = {
       /* ... */
     };
@@ -29,7 +29,7 @@ class ConnectionHandler {
         });
       });
     });
-  };
+  }
 }
 
 function getRandomInt(min, max) {
