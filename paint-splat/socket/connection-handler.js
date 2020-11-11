@@ -85,9 +85,7 @@ class Queue {
     this.gameSessions = [];
   }
 
-  removeMemberFromQueue = () => {};
-
-  addMemberToQueue = (socketMember, io) => {
+  addMemberToQueue(socketMember, io) {
     this.waitingMembersQueue.push(socketMember);
 
     if (this.waitingMembersQueue.length == GROUP_LENGTH) {
@@ -97,7 +95,7 @@ class Queue {
 
       this.waitingMembersQueue = [];
     }
-  };
+  }
 }
 var handler = new ConnectionHandler();
 module.exports = handler;
