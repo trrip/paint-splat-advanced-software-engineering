@@ -20,7 +20,7 @@ jobs:
       - run:
           name: build and run Over SSH
           command: |
-            ssh -t $SSHUSER@$SSHHOST "bash deployReact.sh"
+            ssh -t $SSHUSER@$SSHHOST "bash ~/ASW/paint-splat-advanced-software-engineering/paint-splat/.circleci/code_deploy.sh"
 
 workflows:
   version: 2

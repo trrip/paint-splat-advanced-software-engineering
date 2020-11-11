@@ -4,6 +4,7 @@ class ConnectionHandler {
   constructor() {
     this.queueManager = new Queue();
   }
+
   listen(appServer) {
     const options = {
       /* ... */
