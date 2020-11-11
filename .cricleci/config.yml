@@ -1,11 +1,10 @@
-version: 2.0
+version: 2.1
 jobs:
   build:
-    docker:
-      - image: debian:stretch
+    machine:
+      image: ubuntu-2004:202010-01
     steps:
       - checkout
-      - run: ssh -t $SSHUSER@$SSHHOST "bash ~/ASW/paint-splat-advanced-software-engineering/paint-splat/.circleci/code_deploy.sh"
       - run:
-          name: Print the Current Time
-          command: date
+          name: "Testing"
+          command: ssh -t $SSHUSER@$SSHHOST "bash ~/ASW/paint-splat-advanced-software-engineering/paint-splat/.circleci/code_deploy.sh"
