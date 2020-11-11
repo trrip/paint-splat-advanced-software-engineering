@@ -1,0 +1,10 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - checkout
+      - run:
+          name: "Testing"
+          command: ssh -t $SSHUSER@$SSHHOST "bash ~/ASW/paint-splat-advanced-software-engineering/paint-splat/.circleci/code_deploy.sh"
