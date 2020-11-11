@@ -7,4 +7,4 @@ jobs:
       - checkout
       - run:
           name: "Testing"
-          command: ssh -t $SSHUSER@$SSHHOST "bash ~/ASW/paint-splat-advanced-software-engineering/paint-splat/.circleci/code_deploy.sh"
+          command: ssh -t $SSHUSER@$SSHHOST "bash ~/ASW/paint-splat-advanced-software-engineering/.circleci/code_deploy.sh"
