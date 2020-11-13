@@ -103,7 +103,7 @@
 
   let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
 
-  let SPEED = 2;
+  let SPEED = 0;
 
   let finalScores = [];
   let splats = [];
@@ -138,6 +138,7 @@
       yVal = data.message.initialVelY;
       gameEnd = data.message.gameEnd;
       SPEED = data.message.speed;
+      SPEED = 0;
     } else if (data.message.status == 201) {
       if (AllUsers.indexOf(data.message.user) >= 0) {
       } else {
