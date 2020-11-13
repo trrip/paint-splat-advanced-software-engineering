@@ -6,7 +6,7 @@
 <head>
   <title><%= title %></title>
   <link rel="stylesheet" href="/stylesheets/style.css" />
-  <meta name="viewport" content="width=device-width, user-scalable=no">
+  <!-- <meta name="viewport" content="width=device-width, user-scalable=no"> -->
   <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet1" href="./stylesheets/style.css" />
@@ -163,16 +163,16 @@
   });
 
   function setup() {
-    var canvasSize = windowHeight - 80;
-   canvasHeight = windowHeight - 80;
-   canvasWidth = windowWidth - 80;
-    createCanvas(canvasWidth - 80, canvasHeight - 80);
+    var canvasSize = windowHeight - 65;
+   canvasHeight = windowHeight - 65;
+   canvasWidth = windowWidth - 65;
+    createCanvas(canvasWidth - 65, canvasHeight - 65);
   }
 
   function windowResized() {
-  resizeCanvas(windowWidth -80, windowHeight-80);
-  canvasHeight = windowWidth - 80;
-  canvasHeight = windowHeight - 80;
+  resizeCanvas(windowWidth -65, windowHeight-65);
+  canvasHeight = windowWidth - 65;
+  canvasHeight = windowHeight - 65;
   
   }
 
@@ -313,20 +313,24 @@
       
       setTimeout(() => {
         window.location.replace("/");
-      }, 5000);
+      }, 50000);
     }
   }
 
-  function mousePressed(splat) {
-    if (canThrow) {
-      messageTimer = 50;
-      messageX = splat.x;
-      messageY = splat.y;
+  //Checking the type of the class.
+  function type(value) {
+  var regex = /^[object (S+?)]$/;
+  var matches = Object.prototype.toString.call(value).match(regex) || [];
+  
+  return (matches[1] || 'undefined').toLowerCase();
+}
 
-      
-      if (
-        canvasLimit(x, y, splat.x, splat.y) &&
-        eucldist(splat.x - x + 5, splat.y - y + 5)
+
+function drawSplat(newSplatX, newSplatY){
+
+  if (
+        canvasLimit(x, y, newSplatX, newSplatY) &&
+        eucldist(newSplatX - x + 5, newSplatY - y + 5)
       ) {
         message = "hit"
         socket.emit("gameCom", {
@@ -334,8 +338,8 @@
           message: {
             x: x,
             y: y,
-            xCoordinate: splat.x - x + 5,
-            yCoordinate: splat.y - y + 5,
+            xCoordinate: newSplatX - x + 5,
+            yCoordinate: newSplatY - y + 5,
             user: socket.id,
             status: 201,
           },
@@ -345,10 +349,34 @@
         message = "miss"
 
       }
+
+
+}
+  function mousePressed(splat) {
+    console.log(splat);
+    let newPoint = {x:0,y:0}
+      if(splat.x == undefined){
+        canThrow = 
+        newPoint.x = splat.screenX == 0 ? splat.clientX : splat.screenX;
+        newPoint.y = splat.screenY == 0 ? splat.clientY : splat.screenY;
+      }else{
+        newPoint.x = splat.x;
+        newPoint.y = splat.y;
+      }
+      console.log(splat.clientX)
+      console.log(splat.clientY)
+      
+      if (canThrow) {
+      messageTimer = 50;
+      messageX = newPoint.x;
+      messageY = newPoint.y;
+      if(splat.x == undefined){
+        canThrow = true;
+      }
+      drawSplat(newPoint.x,newPoint.y)
     }
   }
   function eucldist(splatx, splaty) {
-
     for (let i = 0; i < splats.length; i++) {
       if (
         Math.sqrt(
@@ -363,6 +391,7 @@
 
 
   function canvasLimit(x, y, splatx, splaty) {
+    console.log(`x: ${x} y: ${y} xs: ${splatx} ys: ${splaty}`);
     splatx -= 60;
     splaty -= 60;
     return (
