@@ -139,7 +139,7 @@
       yVal = data.message.initialVelY;
       gameEnd = data.message.gameEnd;
       SPEED = data.message.speed;
-      SPEED = 0;
+      // SPEED = 0; // testing speed 
     } else if (data.message.status == 201) {
       if (AllUsers.indexOf(data.message.user) >= 0) {
       } else {
@@ -353,7 +353,6 @@ function drawSplat(newSplatX, newSplatY){
 
 }
   function mousePressed(splat) {
-    console.log(splat);
     let newPoint = {x:0,y:0}
       if(splat.x == undefined){
         canThrow = 
@@ -363,9 +362,7 @@ function drawSplat(newSplatX, newSplatY){
         newPoint.x = splat.x;
         newPoint.y = splat.y;
       }
-      console.log(splat.clientX)
-      console.log(splat.clientY)
-      
+
       if (canThrow) {
       messageTimer = 50;
       messageX = newPoint.x;
