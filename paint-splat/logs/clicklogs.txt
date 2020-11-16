@@ -1,0 +1,18 @@
+TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 325, screenY: 261, clientX: 217, clientY: 279, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 320, screenY: 245, clientX: 205, clientY: 241, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 309, screenY: 298, clientX: 179, clientY: 367, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 359, screenY: 294, clientX: 298, clientY: 358, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 364, screenY: 284, clientX: 310, clientY: 334, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 373, screenY: 301, clientX: 331, clientY: 374, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 373, screenY: 301, clientX: 331, clientY: 374, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 336, screenY: 296, clientX: 243, clientY: 362, …}
+game:321 TouchEvent {isTrusted: true, touches: TouchList, targetTouches: TouchList, changedTouches: TouchList, altKey: false, …}
+game:321 MouseEvent {isTrusted: true, screenX: 336, screenY: 296, clientX: 243, clientY: 362, …}

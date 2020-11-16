@@ -1,5 +1,5 @@
 GROUP_LENGTH = 2;
-
+var localCount = 0;
 class ConnectionHandler {
   constructor() {
     this.queueManager = new Queue();
@@ -10,6 +10,12 @@ class ConnectionHandler {
       /* ... */
     };
     const io = require("socket.io")(appServer, options);
+
+    io.engine.generateId = function (req) {
+      // generate a new custom id here
+      localCount++;
+      return `player${localCount}`;
+    };
 
     io.on("connection", (socket) => {
       // console.log("New socket urser is connected");

@@ -23,6 +23,7 @@
   
       <div class="row center">
         <img src="/resources/loading.gif"></div>
+        
     </div>
     </div>
   </div>
@@ -59,9 +60,18 @@
   </div>
 </div>
 
-
 <script>
   document.getElementById("after-game").style.display = "none";
+  
+  class Player{
+    constructor(socketId) {
+      this.socketId = socketId ;
+      this.count = 0;
+    }
+    getCount() {
+      return this.count;
+    }
+  }
   let GAMETIME = 60000;
   let AllUsers = [];
   let userColorMap = [
@@ -69,6 +79,13 @@
     "#ffa500 ",
     "#3792cb",
     "#800000",
+  ];
+  let userSplashImageMap = [
+    "/resources/splashBlue.png",
+    "/resources/splashGreen.png",
+    "/resources/splashbrown.png",
+    "/resources/splashBlue.png",
+    "/resources/splashRed.png",
   ];
   let playerColourNames = [
     "Green",
@@ -91,7 +108,8 @@
   var xSteps = null;
   var ySteps = null;
   var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
-  AllUsers.push(socket.id);
+  
+  
   var isGameStarted = false;
 
   let roomId = "";
@@ -127,6 +145,11 @@
   let messageY = 0;
   let message = "";
   let canThrow = true;
+  socket.on('connect', () => {
+    console.log(socket.id); 
+    AllUsers.push(new Player(socket.id));
+  });
+  
   socket.on("gameCom", function (data) {
     if (data.message.status == 200) {
       userId = socket.id;
@@ -141,32 +164,64 @@
       SPEED = data.message.speed;
       // SPEED = 0; // testing speed 
     } else if (data.message.status == 201) {
-      if (AllUsers.indexOf(data.message.user) >= 0) {
-      } else {
-        AllUsers.push(data.message.user);
+      console.log(userId);
+      console.log(AllUsers.find(localx => {
+        return localx.socketId === data.message.user;
+      }));
+      if (AllUsers.find(localx => {
+        return localx.socketId === data.message.user;
+      }) === undefined) {
+      // } else { 
+        AllUsers.push(new Player(data.message.user));
       }
+
+      let playerObj = AllUsers.find(localx => {
+        return localx.socketId === data.message.user;
+      }) 
+      let newIndex = AllUsers.findIndex(localx => {
+        return localx.socketId === data.message.user;
+      });
       let newSpat = new Splat(
-        userColorMap[AllUsers.indexOf(data.message.user) - 1],
+        userColorMap[ newIndex],
         data.message.xCoordinate,
         data.message.yCoordinate
       );
-      playerIndex = AllUsers.indexOf(data.message.user) - 1
+      playerIndex = newIndex ;
       splats.push(newSpat);
+      playerObj.count +=1;
     } else if (data.message.status == 202) {
-      finalScores.push({
-        userId: data.message.userId,
-        score: data.message.score,
-        userColour:  data.message.userColour
-      });
+      // here we have all the splats calculate it .
+      // which user has won.
+      
+
+      // var players = AllUsers.map(x => {return {x.color: 0};});
+
+      finalScores = [];
+      let localPlayers = AllUsers.sort((x,y) => {x.count < y.count}); 
+      console.log(localPlayers);
+      // for (let i =0; i< AllUsers.length ; i++){
+        finalScores = localPlayers;
+      // }
     } else {
     }
   });
+  
 
+  var tempImage = [];
   function setup() {
+
     var canvasSize = windowHeight - 65;
    canvasHeight = windowHeight - 65;
    canvasWidth = windowWidth - 65;
     createCanvas(canvasWidth - 65, canvasHeight - 65);
+
+    tempImage = [
+      loadImage(userSplashImageMap[0],"png"),
+      loadImage(userSplashImageMap[1],"png"),
+      loadImage(userSplashImageMap[2],"png"),
+      loadImage(userSplashImageMap[3],"png"),
+    ];
+
   }
 
   function windowResized() {
@@ -182,11 +237,14 @@
   function draw() {
     if (isGameStarted && Date.now() < gameEnd) {
       document.getElementById("before-game").style.display = "none";
+      // document.getElementById("in-game").style.display = "block";
+      // document.getElementById("player-name").innerText = `${userId}`;
+
       clear()
       background(155);
       noFill();
       strokeWeight(1);
-      stroke(51);
+      stroke(255);
       fill("rgb(100%,100%,50%)");
       
       if (x + xVal > canvasWidth - boardWidth || x + xVal < 0) {
@@ -235,8 +293,9 @@
         if (finalColor == null) {
           finalColor = "#FF00FF";
         }
-        fill(finalColor);
-        circle(x + splats[i].x - 65, y + splats[i].y - 65, 10);
+        image(tempImage[userColorMap.indexOf(splats[i].color)], x + splats[i].x - 65, y + splats[i].y - 65,20,20);
+        // fill(finalColor);
+        // circle(x + splats[i].x - 65, y + splats[i].y - 65, 10);
       }
       
       let increaseSpeed = 
@@ -253,19 +312,20 @@
       } else {
         canThrow = true;
       }
+      textSize(24);
+
+      fill(0, 102, 153);
+      text(`id : ${userId}`, 30, 30);
 
     } else if (gameEnd === null || Date.now() < gameEnd) {
       // text("Waiting room ", 100, 80);
-
-    
-
-    } else if (gameEnd === null || Date.now() < gameEnd + 1400) {
+    } else if (gameEnd === null || Date.now() < gameEnd + 400) {
       // 
       background(255);
       noFill();
       strokeWeight(4);
       stroke(51);
-      fill("rgb(100%,100%,50%)");
+      fill("rgb(100%,100%,100%)");
       if(score > 0 && splats.length > 0 ) {
         socket.emit("gameCom", {
           roomId: roomId,
@@ -274,7 +334,6 @@
             status: 202,
             userId: userId, 
             userColour: playerColourNames[playerIndex]
-
           },
         });
      } else {
@@ -288,29 +347,23 @@
         document.getElementById("game-results").innerText = `The match was a draw!`;
       } else {
         let winner = null;
+      let finalResultString = "";
       for (let i = 0; i < finalScores.length; i++) {
-        if (winner === null || winner.score < finalScores[i].score) {
-          winner = {
-            score: finalScores[i].score,
-            userId: finalScores[i].userId,
-            userColour: finalScores[i].userColour,
-          };
-        } else if (winner.score === finalScores[i].score && finalScores[i].userColour !== winner.userColour) {
-          isDraw = true
-        }
+        document.getElementById("after-game").style.display = "block";
+        finalResultString += `\nThe score is ${finalScores[i].socketId} who achieved a score of ${finalScores[i].count}`;
       }
+
+   
       if(isDraw) {
         document.getElementById("after-game").style.display = "block";
         document.getElementById("game-results").innerText = `The match was a draw!`;
 
       } else {
         document.getElementById("after-game").style.display = "block";
-        document.getElementById("game-results").innerText = `The winner is ${winner.userColour} who achieved a score of ${winner.score}`;
+        document.getElementById("game-results").innerText = finalResultString;
       }
       
       }
-
-      
       setTimeout(() => {
         window.location.replace("/");
       }, 50000);
