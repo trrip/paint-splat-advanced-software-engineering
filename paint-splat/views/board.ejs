@@ -162,7 +162,7 @@
       yVal = data.message.initialVelY;
       gameEnd = data.message.gameEnd;
       SPEED = data.message.speed;
-      SPEED = 0; // testing speed 
+      // SPEED = 0; // testing speed 
     } else if (data.message.status == 201) {
       console.log(userId);
       console.log(AllUsers.find(localx => {
@@ -297,7 +297,7 @@
         // image(tempImage[userColorMap.indexOf(splats[i].color)], x + splats[i].x - 65, y + splats[i].y - 65,20,20);
         fill(finalColor);
         //adjusted from 65 to 55 to make the click center
-        circle(x + splats[i].x - 52, y + splats[i].y - 52, 25);
+        circle(x + splats[i].x - 65, y + splats[i].y - 65, 25);
       }
       
       let increaseSpeed = 
@@ -436,7 +436,7 @@ function drawSplat(newSplatX, newSplatY){
         Math.sqrt(
           Math.pow(
             splats[i].x - splatx, 2
-          ) + Math.pow(splats[i].y - splaty, 2)) < 11) {
+          ) + Math.pow(splats[i].y - splaty, 2)) < 27) {
         return false
       }
     }
