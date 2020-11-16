@@ -14,7 +14,7 @@ class ConnectionHandler {
     io.engine.generateId = function (req) {
       // generate a new custom id here
       localCount++;
-      return `player${localCount}`;
+      return `player_${localCount}`;
     };
 
     io.on("connection", (socket) => {
@@ -54,7 +54,7 @@ class GameSession {
     }
     let randomVel = [1, -1];
 
-    let gameEnd = Date.now() + 100000;
+    let gameEnd = Date.now() + 10000;
     let startX = getRandomInt(30, 390);
     let startY = getRandomInt(30, 390);
     let speed = getRandomInt(2, 4);

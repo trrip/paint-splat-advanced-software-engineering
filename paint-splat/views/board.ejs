@@ -75,10 +75,11 @@
   let GAMETIME = 60000;
   let AllUsers = [];
   let userColorMap = [
-    "#00FF00",
+    "#00FF00", //dummy holder.
     "#ffa500 ",
     "#3792cb",
     "#800000",
+    "#00FF00",    
   ];
   let userSplashImageMap = [
     "/resources/splashBlue.png",
@@ -121,7 +122,7 @@
   };
 
   let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
-
+  let MAX_NUMBER_OF_PLAYERS = 2;
   let SPEED = 0;
 
   let finalScores = [];
@@ -146,15 +147,14 @@
   let message = "";
   let canThrow = true;
   socket.on('connect', () => {
-    console.log(socket.id); 
-    AllUsers.push(new Player(socket.id));
+    let localPlayerName = (parseInt(socket.id.split("_")[1])%MAX_NUMBER_OF_PLAYERS) + 1
+    AllUsers.push(new Player("Player " + localPlayerName)); // adding this becuase the color issue was apprearing 
   });
   
   socket.on("gameCom", function (data) {
     if (data.message.status == 200) {
       userId = socket.id;
       isGameStarted = true;
-
       roomId = data.roomId;
       x = data.message.startX % boardWidth;
       y = data.message.startY % boardHeight;
@@ -164,10 +164,6 @@
       SPEED = data.message.speed;
       // SPEED = 0; // testing speed 
     } else if (data.message.status == 201) {
-      console.log(userId);
-      console.log(AllUsers.find(localx => {
-        return localx.socketId === data.message.user;
-      }));
       if (AllUsers.find(localx => {
         return localx.socketId === data.message.user;
       }) === undefined) {
@@ -182,7 +178,7 @@
         return localx.socketId === data.message.user;
       });
       let newSpat = new Splat(
-        userColorMap[ newIndex],
+        userColorMap[newIndex],
         data.message.xCoordinate,
         data.message.yCoordinate
       );
@@ -190,38 +186,20 @@
       splats.push(newSpat);
       playerObj.count +=1;
     } else if (data.message.status == 202) {
-      // here we have all the splats calculate it .
-      // which user has won.
-      
-
-      // var players = AllUsers.map(x => {return {x.color: 0};});
-
       finalScores = [];
-      let localPlayers = AllUsers.sort((x,y) => {x.count < y.count}); 
-      console.log(localPlayers);
-      // for (let i =0; i< AllUsers.length ; i++){
-        finalScores = localPlayers;
-      // }
+      for (let i =1; i< AllUsers.length ; i++){
+        finalScores.push( AllUsers[i]);
+      }
     } else {
     }
   });
   
 
-  // var tempImage = [];
   function setup() {
-
     var canvasSize = windowHeight - 65;
-   canvasHeight = windowHeight - 65;
-   canvasWidth = windowWidth - 65;
+    canvasHeight = windowHeight - 65;
+    canvasWidth = windowWidth - 65;
     createCanvas(canvasWidth - 65, canvasHeight - 65);
-
-// removed image.
-    // tempImage = [
-    //   loadImage(userSplashImageMap[0],"png"),
-    //   loadImage(userSplashImageMap[1],"png"),
-    //   loadImage(userSplashImageMap[2],"png"),
-    //   loadImage(userSplashImageMap[3],"png"),
-    // ];
 
   }
 
@@ -242,20 +220,20 @@
       // document.getElementById("player-name").innerText = `${userId}`;
 
       clear()
-      background(155);
+      background(255);
       noFill();
       strokeWeight(1);
       stroke(255);
       fill("rgb(100%,100%,50%)");
       
-      if (x + xVal > canvasWidth - boardWidth || x + xVal < 0) {
+      if (x + xVal > canvasWidth - boardWidth - 80 || x + xVal < 0) {
         if (x > 5 && x < canvasWidth) {
           yVal = yVal * theCombination[getRandomPathSelector() - 1];
         }
         xVal = xVal * -1;
       }
 
-      if (y + yVal > canvasHeight - boardHeight || y + yVal < 0) {
+      if (y + yVal > canvasHeight - boardHeight - 80 || y + yVal < 0) {
         if (y > 5 && y < canvasHeight) {
           xVal = xVal * theCombination[getRandomPathSelector() - 1];
         }
@@ -265,10 +243,10 @@
 
       if (
         !(y + yVal > canvasHeight - boardHeight || y + yVal < 0) &&
-        !(x + xVal > canvasWidth - boardWidth || x + xVal < 0) &&
+        !(x + xVal > canvasWidth - boardWidth  || x + xVal < 0) &&
         frame % 10 == 0 &&
         Math.random() > 0.5 &&
-        y > 5 &&
+        y > 2 &&
         y < canvasHeight
       ) {
         yVal = yVal * theCombination[getRandomPathSelector() - 1];
@@ -278,14 +256,14 @@
         !(x + xVal > canvasWidth - boardWidth || x + xVal < 0) &&
         frame % 10 == 0 &&
         Math.random() > 0.5 &&
-        x > 5 &&
+        x > 2 &&
         x < canvasWidth
       ) {
         xVal = xVal * theCombination[getRandomPathSelector() - 1];
       }
 
       frame += 1;
-
+      fill('#F5C74A');
       square(x, y, boardWidth);
       for (let i = 0; i < splats.length; i++) {
         strokeWeight(1);
@@ -300,10 +278,12 @@
         circle(x + splats[i].x - 65, y + splats[i].y - 65, 25);
       }
       
-      let increaseSpeed = 
-        ((parseInt((Date.now() / gameEnd + "")[9]) / 6) % 1) * 6 + 1;
-      x = x + xVal * (SPEED * increaseSpeed);
-      y = y + yVal * (SPEED * increaseSpeed);
+      // let increaseSpeed =  // didnt include so far.
+      //   ((parseInt((Date.now() -  gameEnd + "")[9]) / 6) % 1) * 6 + 1;
+      let increaseSpeed = map(Date.now() - gameEnd, 10000,1,1,10);
+      console.log(20 - increaseSpeed);
+      x = x + xVal * (SPEED + 2 * (20 - increaseSpeed));
+      y = y + yVal * (SPEED + 2 * (20 - increaseSpeed));
 
       if (messageTimer > 0) {
         strokeWeight(messageTimer / 30);
@@ -319,7 +299,7 @@
       textSize(24);
       // adding the user id on the screen.
       fill(0, 102, 153);
-      text(`id : ${userId}`, 30, 30);
+      text(`id : ${AllUsers[0].socketId}`, 30, 30);
 
     } else if (gameEnd === null || Date.now() < gameEnd) {
       // text("Waiting room ", 100, 80);
@@ -406,9 +386,8 @@ function drawSplat(newSplatX, newSplatY){
         message = "miss"
 
       }
+  }
 
-
-}
   function mousePressed(splat) {
     let newPoint = {x:0,y:0}
       if(splat.x == undefined){
