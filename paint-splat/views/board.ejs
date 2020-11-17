@@ -31,20 +31,6 @@
 </div>
 
 
-<!-- <div class="section no-pad-bot" id="loading-winners">
-  <div class="container">
-    <div class="row center">
-      <div class="col s12 m8 offset-m2">
-        <h4 class="light">Loading winners </h4>
-  
-      <div class="row center">
-        <img src="/resources/loading.gif"></div>
-    </div>
-    </div>
-  </div>
-  </div>
-</div> -->
-
 <div class="section no-pad-bot" id="after-game">
   <div class="container">
     <div class="row center">
@@ -158,12 +144,10 @@
       yVal = data.message.initialVelY;
       gameEnd = data.message.gameEnd;
       SPEED = data.message.speed;
-      // SPEED = 0; // testing speed 
     } else if (data.message.status == 201) {
       if (AllUsers.find(localx => {
         return localx.socketId === data.message.user;
       }) === undefined) {
-      // } else { 
         AllUsers.push(new Player(data.message.user));
       }
 
