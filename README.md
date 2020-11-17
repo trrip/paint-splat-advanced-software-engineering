@@ -4,10 +4,10 @@ Game for Advance software engineering
 
 ## Group Information
 
-Joshua Cassidy - 20300057
-Sherwin Mascarenhas - 20312410
-Claire Farrell - 16319148
-Nilesh Choudhary - 20303858
+Joshua Cassidy - 20300057<br>
+Sherwin Mascarenhas - 20312410<br>
+Claire Farrell - 16319148<br>
+Nilesh Choudhary - 20313858<br>
 
 ## Available Scripts
 
