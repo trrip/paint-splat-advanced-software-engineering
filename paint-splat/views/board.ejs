@@ -80,18 +80,35 @@
     "#ffa500 ",
     "#3792cb",
     "#800000",
-    "#00FF00",    
+    "#00FF00",
+    "#FF0F0F",
+    "#FF00FF",
+    "#191970",
+    "#00FF7F",
+    "#8A2BE2"
   ];
-
+ 
   let playerColourNames = [
     "Green",
     "Orange",
     "Blue",
-    "Red"
-  ]
+    "Red",
+    "Violet",
+    "Black",
+    "White",
+    "Fusia",
+    "MidnightBlue",
+    "SpringGreen",
+    "BlueViolet",
+  ];
+
+
+
+
+
   let playerIndex = 0;
 
-  var socket = io.connect({ timeout: GAMETIME, reconnectionDelayMax: GAMETIME, autoConnect: true });
+  var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
   
   let isGameStarted = false;
 
