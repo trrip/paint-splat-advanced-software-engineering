@@ -203,7 +203,7 @@
 
     if((canvasWidth - 65 ) < 490 ){
       // mobile device.
-      SCALE = 0.6
+      SCALE = 0.4
     }
     boardHeight = boardHeight * SCALE;
     boardWidth = boardWidth * SCALE;
@@ -281,7 +281,7 @@
         // image(tempImage[userColorMap.indexOf(splats[i].color)], x + splats[i].x - 65, y + splats[i].y - 65,20,20);
         fill(finalColor);
         //adjusted from 65 to 55 to make the click center
-        circle(x + splats[i].x - 65, y + splats[i].y - 65, 25 * SCALE);
+        circle((x + splats[i].x - 65)*SCALE, (y + splats[i].y - 65) * SCALE, 25 * SCALE);
       }
       
       //Increase the speed of board over time.
