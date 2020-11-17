@@ -337,23 +337,22 @@
         document.getElementById("game-results").innerText = `The match was a draw!`;
       } else {
         let winner = null;
-      let finalResultString = "";
-      
-      for (let i = finalScores.length - 1 ; i >= 0; i-- ) {
-        document.getElementById("after-game").style.display = "block";
-        // Player $Number achieved a score of $score 
-        finalResultString += `\n${generateFinalName(finalScores[i].socketId)} achieved a score of ${finalScores[i].count}`;
-      }
+        let finalResultString = "";
+        
+        for (let i = finalScores.length - 1 ; i >= 0; i-- ) {
+          document.getElementById("after-game").style.display = "block";
+          // Player $Number achieved a score of $score 
+          finalResultString += `\n${generateFinalName(finalScores[i].socketId)} achieved a score of ${finalScores[i].count}`;
+        }
 
-      if(isDraw) {
-        document.getElementById("after-game").style.display = "block";
-        document.getElementById("game-results").innerText = `The match was a draw!`;
+        if(isDraw) {
+          document.getElementById("after-game").style.display = "block";
+          document.getElementById("game-results").innerText = `The match was a draw!`;
 
-      } else {
-        document.getElementById("after-game").style.display = "block";
-        document.getElementById("game-results").innerText = finalResultString;
-        //socket.destroy();      
-      }
+        } else {
+          document.getElementById("after-game").style.display = "block";
+          document.getElementById("game-results").innerText = finalResultString;
+        }
       
       }
       setTimeout(() => {
@@ -426,7 +425,6 @@ function drawSplat(newSplatX, newSplatY){
     return true
   }
   function canvasLimit(x, y, splatx, splaty) {
-    // console.log(`x: ${x} y: ${y} xs: ${splatx} ys: ${splaty}`);
     splatx -= 60;
     splaty -= 60;
     return (
