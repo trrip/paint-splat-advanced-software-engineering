@@ -1,4 +1,4 @@
-GROUP_LENGTH = 2;
+GROUP_LENGTH = 4;
 var localCount = 0;
 class ConnectionHandler {
   constructor() {
@@ -54,7 +54,7 @@ class GameSession {
     }
     let randomVel = [1, -1];
 
-    let gameEnd = Date.now() + 10000;
+    let gameEnd = Date.now() + 60000;
     let startX = getRandomInt(30, 390);
     let startY = getRandomInt(30, 390);
     let speed = getRandomInt(2, 4);
