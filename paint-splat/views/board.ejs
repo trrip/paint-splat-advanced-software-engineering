@@ -91,7 +91,7 @@
   ]
   let playerIndex = 0;
 
-  var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
+  var socket = io.connect({ timeout: GAMETIME, reconnectionDelayMax: GAMETIME, autoConnect: true });
   
   let isGameStarted = false;
 
