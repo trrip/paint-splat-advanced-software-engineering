@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/stylesheets/style.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
+  <link rel="manifest" href="/manifest.json">
 </head>
 
 <body>
@@ -31,6 +31,17 @@
     </div>
   </div>
   </div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service_worker.js', { scope: '.' }).then((registration) => {
+          console.log('Successfully registered ServiceWorker with scope: ', registration.scope);
+        }, (err) => {
+          console.log('Failed to register ServiceWorker: ', err);
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>

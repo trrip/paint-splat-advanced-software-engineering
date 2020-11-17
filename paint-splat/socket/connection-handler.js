@@ -1,4 +1,4 @@
-GROUP_LENGTH = 2;
+GROUP_LENGTH = 4;
 var localCount = 0;
 class ConnectionHandler {
   constructor() {
@@ -6,24 +6,15 @@ class ConnectionHandler {
   }
 
   listen(appServer) {
-    const options = {
-      /* ... */
-    };
-    const io = require("socket.io")(appServer, options);
+    const io = require("socket.io")(appServer, {});
 
     io.engine.generateId = function (req) {
-      // generate a new custom id here
       localCount++;
       return `player_${localCount}`;
     };
 
     io.on("connection", (socket) => {
-      // console.log("New socket urser is connected");
-
       this.queueManager.addMemberToQueue(socket, io);
-      // socket.on([...somevar], ...);
-
-      //
       socket.on("disconnect", () => {
         console.log("user disconnected");
       });
@@ -39,10 +30,8 @@ class ConnectionHandler {
   }
 }
 
-function getRandomInt(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.round(Math.random() * (max - min + 1)) + min;
+function randomNumber(min, max) {
+  return Math.round(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) + Math.ceil(min);
 }
 
 class GameSession {
@@ -52,12 +41,10 @@ class GameSession {
     for (let i of members) {
       i.join(this.uniqueName);
     }
-    let randomVel = [1, -1];
-
     let gameEnd = Date.now() + 10000;
-    let startX = getRandomInt(30, 390);
-    let startY = getRandomInt(30, 390);
-    let speed = getRandomInt(2, 4);
+    let startX = randomNumber(30, 390);
+    let startY = randomNumber(30, 390);
+    let speed = randomNumber(2, 4);
 
     let initialVelocityX = Math.random() < 0.5 ? -1 : 1;
     let initialVelocityY = Math.random() < 0.5 ? -1 : 1;
