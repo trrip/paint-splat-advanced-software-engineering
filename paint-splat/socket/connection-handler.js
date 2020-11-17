@@ -31,7 +31,10 @@ class ConnectionHandler {
 }
 
 function randomNumber(min, max) {
-  return Math.round(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) + Math.ceil(min);
+  return (
+    Math.round(Math.random() * (Math.floor(max) - Math.ceil(min) + 1)) +
+    Math.ceil(min)
+  );
 }
 
 class GameSession {
@@ -41,7 +44,7 @@ class GameSession {
     for (let i of members) {
       i.join(this.uniqueName);
     }
-    let gameEnd = Date.now() + 10000;
+    let gameEnd = Date.now() + 20000;
     let startX = randomNumber(30, 390);
     let startY = randomNumber(30, 390);
     let speed = randomNumber(2, 4);

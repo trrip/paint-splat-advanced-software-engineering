@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet1" href="./stylesheets/style.css" />
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
             
 </head>
@@ -67,6 +68,9 @@
       this.socketId = socketId ;
       this.count = 0;
     }
+    getCount() {
+      return this.count;
+    }
   }
 
   class Splat {
@@ -83,7 +87,7 @@
 
   let MAX_NUMBER_OF_PLAYERS = 4;
   let SPEED = 0;
-  let GAMETIME = 60000;
+  let GAMETIME = 20000;
   let AllUsers = [];
   let userColorMap = [
     "#00FF00", //dummy holder.
@@ -92,6 +96,7 @@
     "#800000",
     "#00FF00",    
   ];
+
   let playerColourNames = [
     "Green",
     "Orange",
@@ -135,6 +140,8 @@
   let messageY = 0;
   let message = "";
   let canThrow = true;
+  let SCALE = 1;
+
   socket.on('connect', () => {
     let localPlayerName = (parseInt(socket.id.split("_")[1])%MAX_NUMBER_OF_PLAYERS) + 1
     AllUsers.push(new Player("Player " + localPlayerName)); // adding this becuase the color issue was apprearing 
@@ -145,7 +152,7 @@
       userId = socket.id;
       isGameStarted = true;
       roomId = data.roomId;
-      x = 20 ; //data.message.startX % boardWidth;
+      x = 35 ; //data.message.startX % boardWidth;
       y = 50 ; // data.message.startY % boardHeight;
       xVal = data.message.initialVelX;
       yVal = data.message.initialVelY;
@@ -191,7 +198,16 @@
     canvasHeight = windowHeight - 65;
     canvasWidth = windowWidth - 65;
     createCanvas(canvasWidth - 65, canvasHeight - 65);
+    
+    console.log(canvasWidth-65);
 
+    if((canvasWidth - 65 ) < 490 ){
+      // mobile device.
+      SCALE = 0.6
+    }
+    boardHeight = boardHeight * SCALE;
+    boardWidth = boardWidth * SCALE;
+    
   }
   // funcation called when the windows size is changed
   function windowResized() {
@@ -206,6 +222,7 @@
   }
 
   function draw() {
+
     if (isGameStarted && Date.now() < gameEnd) {
       document.getElementById("before-game").style.display = "none";
 
@@ -264,11 +281,11 @@
         // image(tempImage[userColorMap.indexOf(splats[i].color)], x + splats[i].x - 65, y + splats[i].y - 65,20,20);
         fill(finalColor);
         //adjusted from 65 to 55 to make the click center
-        circle(x + splats[i].x - 65, y + splats[i].y - 65, 25);
+        circle(x + splats[i].x - 65, y + splats[i].y - 65, 25 * SCALE);
       }
       
       //Increase the speed of board over time.
-      let increaseSpeed = map(Date.now() - gameEnd, 60000,1,1,10);
+      let increaseSpeed = map(Date.now() - gameEnd, GAMETIME,1,1,10);
       x = x + xVal * (SPEED + 2 * (20 - increaseSpeed));
       y = y + yVal * (SPEED + 2 * (20 - increaseSpeed));
 
@@ -320,7 +337,7 @@
         let winner = null;
       let finalResultString = "";
       
-      for (let i = finalScores.length -1 ; i >= 0; i--) {
+      for (let i = finalScores.length -1 ; i >= 0; i) {
         document.getElementById("after-game").style.display = "block";
         finalResultString += `\nThe score is ${generateFinalName(finalScores[i].socketId)} who achieved a score of ${finalScores[i].count}`;
       }
@@ -333,12 +350,13 @@
       } else {
         document.getElementById("after-game").style.display = "block";
         document.getElementById("game-results").innerText = finalResultString;
+        socket.destroy();      
       }
       
       }
       setTimeout(() => {
         window.location.replace("/");
-      }, 50000);
+      }, 5000);
     }
   }
 
