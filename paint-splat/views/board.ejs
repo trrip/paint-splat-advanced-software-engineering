@@ -192,14 +192,13 @@
   });
   
 
-  //setup function: like init state.
+  //setup function: like init state.  
   function setup() {
     var canvasSize = windowHeight - 65;
     canvasHeight = windowHeight - 65;
     canvasWidth = windowWidth - 65;
     createCanvas(canvasWidth - 65, canvasHeight - 65);
     
-    console.log(canvasWidth-65);
 
     if((canvasWidth - 65 ) < 490 ){
       // mobile device.
@@ -282,7 +281,7 @@
         fill(finalColor);
         //adjusted from 65 to 55 to make the click center
         let newX = map( splats[i].x  - 65, 1,300,1,boardWidth )
-        let newY = map( splats[i].x  - 65, 1,300,1,boardWidth )
+        let newY = map( splats[i].y  - 65, 1,300,1,boardHeight )
 
         circle(x +newX, y + newY , 25 * SCALE);
       }
@@ -340,12 +339,11 @@
         let winner = null;
       let finalResultString = "";
       
-      for (let i = finalScores.length -1 ; i >= 0; i) {
+      for (let i = finalScores.length - 1 ; i >= 0; i-- ) {
         document.getElementById("after-game").style.display = "block";
         finalResultString += `\nThe score is ${generateFinalName(finalScores[i].socketId)} who achieved a score of ${finalScores[i].count}`;
       }
 
-   
       if(isDraw) {
         document.getElementById("after-game").style.display = "block";
         document.getElementById("game-results").innerText = `The match was a draw!`;
@@ -353,7 +351,7 @@
       } else {
         document.getElementById("after-game").style.display = "block";
         document.getElementById("game-results").innerText = finalResultString;
-        socket.destroy();      
+        //socket.destroy();      
       }
       
       }
