@@ -68,6 +68,21 @@
       this.count = 0;
     }
   }
+
+  class Splat {
+    constructor(color, x, y) {
+      this.color = color;
+      this.x = x;
+      this.y = y;
+    }
+    getColor() {
+      return this.color;
+    }
+  }
+
+
+  let MAX_NUMBER_OF_PLAYERS = 4;
+  let SPEED = 0;
   let GAMETIME = 60000;
   let AllUsers = [];
   let userColorMap = [
@@ -85,17 +100,8 @@
   ]
   let playerIndex = 0;
 
-  class Splat {
-    constructor(color, x, y) {
-      this.color = color;
-      this.x = x;
-      this.y = y;
-    }
-    getColor() {
-      return this.color;
-    }
-  }
   var socket = io.connect({ timeout: GAMETIME, autoConnect: true });
+  
   var isGameStarted = false;
 
   let roomId = "";
@@ -107,8 +113,6 @@
   };
 
   let theCombination = [-1, 1, 1, -1, 1, 1, 1, -1, -1, -1];
-  let MAX_NUMBER_OF_PLAYERS = 2;
-  let SPEED = 0;
 
   let finalScores = [];
   let splats = [];
@@ -137,12 +141,12 @@
   });
   
   socket.on("gameCom", function (data) {
-    if (data.message.status == 200) {
+    if (data.message.status == 200) { // initalizing the data values from the server.
       userId = socket.id;
       isGameStarted = true;
       roomId = data.roomId;
-      x = data.message.startX % boardWidth;
-      y = data.message.startY % boardHeight;
+      x = 20 ; //data.message.startX % boardWidth;
+      y = 50 ; // data.message.startY % boardHeight;
       xVal = data.message.initialVelX;
       yVal = data.message.initialVelY;
       gameEnd = data.message.gameEnd;
@@ -172,14 +176,16 @@
       playerObj.count +=1;
     } else if (data.message.status == 202) {
       finalScores = [];
-      for (let i =1; i< AllUsers.length ; i++){
-        finalScores.push( AllUsers[i]);
+      let tempUserHolder = AllUsers.sort((x,y) => x.count > y.count)
+      for (let i = 1; i < AllUsers.length ; i++){
+        finalScores.push(tempUserHolder[i]);
       }
     } else {
     }
   });
   
 
+  //setup function: like init state.
   function setup() {
     var canvasSize = windowHeight - 65;
     canvasHeight = windowHeight - 65;
@@ -187,7 +193,7 @@
     createCanvas(canvasWidth - 65, canvasHeight - 65);
 
   }
-
+  // funcation called when the windows size is changed
   function windowResized() {
   resizeCanvas(windowWidth -65, windowHeight-65);
   canvasHeight = windowWidth - 65;
@@ -198,11 +204,10 @@
   function getRandomPathSelector() {
     return Math.floor(Math.random() * 9 + 1);
   }
+
   function draw() {
     if (isGameStarted && Date.now() < gameEnd) {
       document.getElementById("before-game").style.display = "none";
-      // document.getElementById("in-game").style.display = "block";
-      // document.getElementById("player-name").innerText = `${userId}`;
 
       clear()
       background(255);
@@ -211,18 +216,17 @@
       stroke(255);
       fill("rgb(100%,100%,50%)");
       
+      //randomizing and board logic
       if (x + xVal > canvasWidth - boardWidth - 80 || x + xVal < 0) {
         if (x > 5 && x < canvasWidth) {
           yVal = yVal * theCombination[getRandomPathSelector() - 1];
         }
         xVal = xVal * -1;
       }
-
       if (y + yVal > canvasHeight - boardHeight - 80 || y + yVal < 0) {
         if (y > 5 && y < canvasHeight) {
           xVal = xVal * theCombination[getRandomPathSelector() - 1];
         }
-
         yVal = yVal * -1;
       }
 
@@ -263,10 +267,8 @@
         circle(x + splats[i].x - 65, y + splats[i].y - 65, 25);
       }
       
-      // let increaseSpeed =  // didnt include so far.
-      //   ((parseInt((Date.now() -  gameEnd + "")[9]) / 6) % 1) * 6 + 1;
-      let increaseSpeed = map(Date.now() - gameEnd, 10000,1,1,10);
-      console.log(20 - increaseSpeed);
+      //Increase the speed of board over time.
+      let increaseSpeed = map(Date.now() - gameEnd, 60000,1,1,10);
       x = x + xVal * (SPEED + 2 * (20 - increaseSpeed));
       y = y + yVal * (SPEED + 2 * (20 - increaseSpeed));
 
@@ -317,9 +319,10 @@
       } else {
         let winner = null;
       let finalResultString = "";
-      for (let i = 0; i < finalScores.length; i++) {
+      
+      for (let i = finalScores.length -1 ; i >= 0; i--) {
         document.getElementById("after-game").style.display = "block";
-        finalResultString += `\nThe score is ${finalScores[i].socketId} who achieved a score of ${finalScores[i].count}`;
+        finalResultString += `\nThe score is ${generateFinalName(finalScores[i].socketId)} who achieved a score of ${finalScores[i].count}`;
       }
 
    
@@ -339,14 +342,10 @@
     }
   }
 
-  //Checking the type of the class.
-  function type(value) {
-  var regex = /^[object (S+?)]$/;
-  var matches = Object.prototype.toString.call(value).match(regex) || [];
-  
-  return (matches[1] || 'undefined').toLowerCase();
-}
-
+  function generateFinalName(socketId){
+    let seperatedValues = socketId.split("_");
+    return  `Player ${seperatedValues[1] % MAX_NUMBER_OF_PLAYERS + 1}`;
+  }
 
 function drawSplat(newSplatX, newSplatY){
 
@@ -406,10 +405,8 @@ function drawSplat(newSplatX, newSplatY){
     }
     return true
   }
-
-
   function canvasLimit(x, y, splatx, splaty) {
-    console.log(`x: ${x} y: ${y} xs: ${splatx} ys: ${splaty}`);
+    // console.log(`x: ${x} y: ${y} xs: ${splatx} ys: ${splaty}`);
     splatx -= 60;
     splaty -= 60;
     return (
